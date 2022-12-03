@@ -12,6 +12,10 @@ class RoutingTest extends PHPUnit\Framework\TestCase
         $this->request = $this
             ->getMockBuilder(Request::class)
             ->getMock();
+        $this->request->expects($this->never())
+            ->method('getPath');
+        $this->request->expects($this->never())
+            ->method('getMethod');
 
         $router = new Router();
         $response = $router->match($this->request);
@@ -81,9 +85,12 @@ class RoutingTest extends PHPUnit\Framework\TestCase
         $this->request = $this
             ->getMockBuilder(Request::class)
             ->getMock();
-        $this->request->expects($this->once())
+        $this->request->expects($this->exactly(2))
             ->method('getPath')
             ->willReturn('/');
+        $this->request->expects($this->exactly(3))
+            ->method('getMethod')
+            ->willReturn('GET');
 
         $router = new Router();
         $router->add('/', Controller::class);
@@ -98,10 +105,10 @@ class RoutingTest extends PHPUnit\Framework\TestCase
         $this->request = $this
             ->getMockBuilder(Request::class)
             ->getMock();
-        $this->request->expects($this->once())
+        $this->request->expects($this->exactly(2))
             ->method('getPath')
             ->willReturn('/');
-        $this->request->expects($this->once())
+        $this->request->expects($this->exactly(3))
             ->method('getMethod')
             ->willReturn('POST');
 

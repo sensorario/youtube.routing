@@ -4,33 +4,30 @@ class Router
 {
     private array $routes = [];
 
-    private string $lastMatch;
+    private Request $lastRequest;
 
-    private string $lastMethod;
+    public function add(string $path, string $controller, $method = 'GET')
+    {
+        $this->routes[$path][$method] = $controller; 
+    }
 
     public function match(Request $request)
     {
-        $method = $request->getMethod();
-        return isset($this->routes[$request->getPath()][$method]);
-    }
+        if ($this->routes === []) {
+            return false;
+        }
 
-    public function add(
-        string $path,
-        string $controller,
-        string $method = 'GET',
-    ): void {
-        $this->lastMatch = $path;
-        $this->lastMethod = $method;
-        $this->routes[$this->lastMatch][$method] = $controller;
+        $this->lastRequest = $request;
+        return isset($this->routes[$request->getPath()][$request->getMethod()]);
     }
 
     public function controller(): string
     {
-        return $this->routes[$this->lastMatch][$this->lastMethod];
+        return $this->routes[$this->lastRequest->getPath()][$this->lastRequest->getMethod()];
     }
 
     public function action(): string
     {
-        return $this->lastMethod;
+        return $this->lastRequest->getMethod();
     }
 }
