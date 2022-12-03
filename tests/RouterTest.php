@@ -99,7 +99,7 @@ class RoutingTest extends PHPUnit\Framework\TestCase
     }
 
     /** @test */
-    public function shouldReturnControllerAndActionOfAGivenRoute()
+    public function shouldReturnControllerOfAGivenRoute()
     {
         $this->request = $this
             ->getMockBuilder(Request::class)
@@ -107,7 +107,7 @@ class RoutingTest extends PHPUnit\Framework\TestCase
         $this->request->expects($this->exactly(2))
             ->method('getPath')
             ->willReturn('/');
-        $this->request->expects($this->exactly(3))
+        $this->request->expects($this->exactly(2))
             ->method('getMethod')
             ->willReturn('GET');
 
@@ -115,6 +115,24 @@ class RoutingTest extends PHPUnit\Framework\TestCase
         $router->add('/', Controller::class);
         $router->match($this->request);        
         $this->assertSame(Controller::class, $router->controller());
+    }
+
+    /** @test */
+    public function shouldReturnActionOfAGivenRoute()
+    {
+        $this->request = $this
+            ->getMockBuilder(Request::class)
+            ->getMock();
+        $this->request->expects($this->exactly(1))
+            ->method('getPath')
+            ->willReturn('/');
+        $this->request->expects($this->exactly(2))
+            ->method('getMethod')
+            ->willReturn('GET');
+
+        $router = new Router();
+        $router->add('/', Controller::class);
+        $router->match($this->request);        
         $this->assertSame('GET', $router->action());
     }
 
