@@ -36,6 +36,25 @@ class RoutingTest extends PHPUnit\Framework\TestCase
             ->willReturn('POST');
 
         $router = new Router();
+        $router->add('/', Controller::class, 'GET');
+        $response = $router->match($this->request);        
+        $this->assertSame(false, $response);
+    }
+
+    /** @test */
+    public function shouldStoreGetRouteWhenMethodIsOmitted()
+    {
+        $this->request = $this
+            ->getMockBuilder(Request::class)
+            ->getMock();
+        $this->request->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/');
+        $this->request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('POST');
+
+        $router = new Router();
         $router->add('/', Controller::class);
         $response = $router->match($this->request);        
         $this->assertSame(false, $response);
