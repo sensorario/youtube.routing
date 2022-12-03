@@ -10,7 +10,7 @@ class Router
         string $path,
         string $controller,
         string $method = 'GET',
-    ): void
+    ):void
     {
         $this->routes[$path][$method] = $controller;
     }
@@ -28,21 +28,17 @@ class Router
         $path = $this->request->getPath();
         $method = $this->request->getMethod();
 
-        if (isset($this->routes[$path][$method])) {
-            return true;
-        }
-
-        return false;
+        return isset($this->routes[$path][$method]);
     }
 
-    public function controller()
+    public function controller(): string
     {
         $path = $this->request->getPath();
         $method = $this->request->getMethod();
         return $this->routes[$path][$method];
     }
 
-    public function action()
+    public function action(): string
     {
         return $this->request->getMethod();
     }

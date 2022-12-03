@@ -7,22 +7,6 @@ class RoutingTest extends PHPUnit\Framework\TestCase
     private Controller $controller;
 
     /** @test */
-    public function shouldReturnNoRouteWheneverNotYetConfigured()
-    {
-        $this->request = $this
-            ->getMockBuilder(Request::class)
-            ->getMock();
-        $this->request->expects($this->never())
-            ->method('getPath');
-        $this->request->expects($this->never())
-            ->method('getMethod');
-
-        $router = new Router();
-        $response = $router->match($this->request);
-        $this->assertSame(false, $response);
-    }
-
-    /** @test */
     public function shouldNeverMatchWithWrongMethod()
     {
         $this->request = $this
@@ -38,6 +22,22 @@ class RoutingTest extends PHPUnit\Framework\TestCase
         $router = new Router();
         $router->add('/', Controller::class, 'GET');
         $response = $router->match($this->request);        
+        $this->assertSame(false, $response);
+    }
+
+    /** @test */
+    public function shouldReturnNoRouteWheneverNotYetConfigured()
+    {
+        $this->request = $this
+            ->getMockBuilder(Request::class)
+            ->getMock();
+        $this->request->expects($this->never())
+            ->method('getPath');
+        $this->request->expects($this->never())
+            ->method('getMethod');
+
+        $router = new Router();
+        $response = $router->match($this->request);
         $this->assertSame(false, $response);
     }
 
@@ -112,9 +112,10 @@ class RoutingTest extends PHPUnit\Framework\TestCase
             ->willReturn('GET');
 
         $router = new Router();
-        $router->add('/', Controller::class);
+        $router->add('/', FirstController::class);
+        $router->add('/foo', SecondController::class);
         $router->match($this->request);        
-        $this->assertSame(Controller::class, $router->controller());
+        $this->assertSame(FirstController::class, $router->controller());
     }
 
     /** @test */
