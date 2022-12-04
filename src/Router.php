@@ -6,18 +6,16 @@ class Router
 
     private Request $request;
 
-    public function add(
-        string $path,
-        string $controller,
-        string $method = 'GET',
-    ):void
+    private string $controller;
+
+    private string $action;
+
+    public function add(string $method, string $path, string $controller)
     {
         $this->routes[$path][$method] = $controller;
     }
 
-    public function match(
-        Request $request,
-    ): bool
+    public function match(Request $request): bool
     {
         if ($this->routes === []) {
             return false;
@@ -28,18 +26,23 @@ class Router
         $path = $this->request->getPath();
         $method = $this->request->getMethod();
 
-        return isset($this->routes[$path][$method]);
+        $found = isset($this->routes[$path][$method]);
+
+        if ($found == true) {
+            $this->controller = $this->routes[$path][$method];
+            $this->action = strtolower($method);
+        }
+
+        return $found;
     }
 
-    public function controller(): string
+    public function controller()
     {
-        $path = $this->request->getPath();
-        $method = $this->request->getMethod();
-        return $this->routes[$path][$method];
+        return $this->controller;
     }
 
-    public function action(): string
+    public function action()
     {
-        return $this->request->getMethod();
+        return $this->action;
     }
 }

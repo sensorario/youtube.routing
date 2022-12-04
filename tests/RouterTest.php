@@ -1,32 +1,18 @@
 <?php
 
-class RoutingTest extends PHPUnit\Framework\TestCase
+class RouterTest extends PHPUnit\Framework\TestCase
 {
+    private Router $router;
+
     private Request $request;
 
-    private Controller $controller;
-
-    /** @test */
-    public function shouldNeverMatchWithWrongMethod()
+    public function setUp(): void
     {
-        $this->request = $this
-            ->getMockBuilder(Request::class)
-            ->getMock();
-        $this->request->expects($this->once())
-            ->method('getPath')
-            ->willReturn('/');
-        $this->request->expects($this->once())
-            ->method('getMethod')
-            ->willReturn('POST');
-
-        $router = new Router();
-        $router->add('/', Controller::class, 'GET');
-        $response = $router->match($this->request);        
-        $this->assertSame(false, $response);
+        $this->router = new Router();
     }
 
     /** @test */
-    public function shouldReturnNoRouteWheneverNotYetConfigured()
+    public function shouldNeverLookForMethodAndPathWheneverIsEmpty()
     {
         $this->request = $this
             ->getMockBuilder(Request::class)
@@ -36,32 +22,12 @@ class RoutingTest extends PHPUnit\Framework\TestCase
         $this->request->expects($this->never())
             ->method('getMethod');
 
-        $router = new Router();
-        $response = $router->match($this->request);
-        $this->assertSame(false, $response);
+        $result = $this->router->match($this->request);
+        $this->assertSame(false, $result);
     }
 
     /** @test */
-    public function shouldStoreGetRouteWhenMethodIsOmitted()
-    {
-        $this->request = $this
-            ->getMockBuilder(Request::class)
-            ->getMock();
-        $this->request->expects($this->once())
-            ->method('getPath')
-            ->willReturn('/');
-        $this->request->expects($this->once())
-            ->method('getMethod')
-            ->willReturn('POST');
-
-        $router = new Router();
-        $router->add('/', Controller::class);
-        $response = $router->match($this->request);        
-        $this->assertSame(false, $response);
-    }
-
-    /** @test */
-    public function shouldCheckRequestPathWheneverSomeRoutesExists()
+    public function shouldMatchGetRequestIfStoredInTheRouter()
     {
         $this->request = $this
             ->getMockBuilder(Request::class)
@@ -73,14 +39,14 @@ class RoutingTest extends PHPUnit\Framework\TestCase
             ->method('getMethod')
             ->willReturn('GET');
 
-        $router = new Router();
-        $router->add('/', Controller::class);
-        $response = $router->match($this->request);        
-        $this->assertSame(true, $response);
+        $this->router->add('GET', '/', HomeController::class);
+
+        $result = $this->router->match($this->request);
+        $this->assertSame(true, $result);
     }
 
     /** @test */
-    public function shouldAddRouteWithoutDefaultHttpMethod()
+    public function shouldReturnControllerAfterGivenSuccessfulMatch()
     {
         $this->request = $this
             ->getMockBuilder(Request::class)
@@ -90,70 +56,13 @@ class RoutingTest extends PHPUnit\Framework\TestCase
             ->willReturn('/');
         $this->request->expects($this->once())
             ->method('getMethod')
-            ->willReturn('POST');
-
-        $router = new Router();
-        $router->add('/', Controller::class, 'POST');
-        $response = $router->match($this->request);        
-        $this->assertSame(true, $response);
-    }
-
-    /** @test */
-    public function shouldReturnControllerOfAGivenRoute()
-    {
-        $this->request = $this
-            ->getMockBuilder(Request::class)
-            ->getMock();
-        $this->request->expects($this->exactly(2))
-            ->method('getPath')
-            ->willReturn('/');
-        $this->request->expects($this->exactly(2))
-            ->method('getMethod')
             ->willReturn('GET');
 
-        $router = new Router();
-        $router->add('/', FirstController::class);
-        $router->add('/foo', SecondController::class);
-        $router->match($this->request);        
-        $this->assertSame(FirstController::class, $router->controller());
-    }
+        $this->router->add('GET', '/', HomeController::class);
 
-    /** @test */
-    public function shouldReturnActionOfAGivenRoute()
-    {
-        $this->request = $this
-            ->getMockBuilder(Request::class)
-            ->getMock();
-        $this->request->expects($this->exactly(1))
-            ->method('getPath')
-            ->willReturn('/');
-        $this->request->expects($this->exactly(2))
-            ->method('getMethod')
-            ->willReturn('GET');
+        $this->router->match($this->request);
 
-        $router = new Router();
-        $router->add('/', Controller::class);
-        $router->match($this->request);        
-        $this->assertSame('GET', $router->action());
-    }
-
-    /** @test */
-    public function shouldTakeActionFromNonDefaultValue()
-    {
-        $this->request = $this
-            ->getMockBuilder(Request::class)
-            ->getMock();
-        $this->request->expects($this->exactly(2))
-            ->method('getPath')
-            ->willReturn('/');
-        $this->request->expects($this->exactly(3))
-            ->method('getMethod')
-            ->willReturn('POST');
-
-        $router = new Router();
-        $router->add('/', Controller::class, 'POST');
-        $router->match($this->request);        
-        $this->assertSame(Controller::class, $router->controller());
-        $this->assertSame('POST', $router->action());
+        $this->assertSame(HomeController::class, $this->router->controller());
+        $this->assertSame('get', $this->router->action());
     }
 }

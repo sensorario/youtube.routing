@@ -11,7 +11,7 @@ class HomeController
 }
 
 $router = new Router();
-$router->add('/', HomeController::class);
+$router->add('GET', '/', HomeController::class);
 if ($router->match(new Request())) {
     echo '< HTTP/2 200<br>< Pagina trovata';
     $controller = $router->controller();
